@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="replyboard">
+
+	<insert id="insert" parameterType="com.mysite.vo.ReplyBoardVo">
+		<choose>
+			<when test="groupNo == 0 or groupNo == '' ">
+				insert into replyboard
+				values
+				(seq_replyboard_no.nextval,
+				#{title},
+				#{content},
+				0,
+				sysdate,
+				#{userNo},
+				seq_replyboard_no.currval,
+				1,
+				0,
+				'ok')
+			</when>
+			<otherwise>
+				insert into replyboard
+				values (seq_replyboard_no.nextval,
+				#{title},
+				#{content},
+				0,
+				sysdate,
+				#{userNo},
+				#{groupNo },
+				#{orderNo },
+				#{depth },
+				'ok')
+			</otherwise>
+		</choose>
+
+
+	</insert>
+
+	<select id="selectList" resultType="com.mysite.vo.ReplyBoardVo">
+		select r.no,
+		r.title,
+		r.content,
+		r.hit,
+		r.reg_date regDate,
+		r.user_No userNo,
+		u.name userName,
+		r.group_no groupNo,
+		r.order_no orderNo,
+		r.depth,
+		r.state
+		from replyboard r, users u
+		where r.user_No = u.no
+		order by groupNo desc,
+		orderNo asc
+	</select>
+
+
+	<select id="selectReplyBoard" parameterType="int" resultType="com.mysite.vo.ReplyBoardVo">
+		select r.no,
+		r.title,
+		r.content,
+		r.hit,
+		r.reg_date regDate,
+		r.user_No userNo,
+		u.name userName,
+		r.group_no groupNo,
+		r.order_no orderNo,
+		r.depth,
+		r.state
+		from replyboard r, users u
+		where r.user_No = u.no
+		and r.no = #{no}
+	</select>
+	
+	<update id="updateHit" parameterType="int">
+		<![CDATA[
+			update replyBoard 
+			set hit = hit+1
+			where no = #{no}
+		]]>
+	</update>
+	
+	<update id="increaseOrderNo" parameterType="map">
+		<![CDATA[
+			update replyboard
+			set order_no = order_no+1
+			where group_no = #{groupNo }
+			and order_no > #{orderNo }
+		]]>
+
+	</update>
+
+	<update id="update" parameterType="com.mysite.vo.ReplyBoardVo">
+		<![CDATA[
+			update replyboard
+			set title=#{title },
+		   		content=#{content }
+			where no=#{no }
+		  	and user_no = #{userNo}
+		]]>
+
+	</update>
+
+
+	<update id="delete" parameterType="com.mysite.vo.ReplyBoardVo">
+		<![CDATA[
+			update replyboard
+			set state= 'del'
+			where no=#{no }
+		  	and user_no = #{userNo}
+		]]>
+
+	</update>
+
+
+
+
+
+</mapper>
